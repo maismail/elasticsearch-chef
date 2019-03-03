@@ -44,3 +44,7 @@ default['elastic']['kernel']['vm.max_map_count']      = "262144"
 # Whether to reindex the projects index. In case of changes in the index,
 # set this attr to true. It will then be deleted and re-created so epipe can reindex it.
 default['elastic']['projects']['reindex']   = "false"
+
+
+default["elastic"][:default][:public_ips]           = node["install"]["public_ips"].empty? ? ['10.0.2.15'] : node["install"]["public_ips"]  
+default["elastic"][:default][:private_ips]          = node["install"]["private_ips"].empty? ? ['10.0.2.15'] : node["install"]["private_ips"]
