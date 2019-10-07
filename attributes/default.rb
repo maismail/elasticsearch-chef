@@ -1,10 +1,10 @@
 include_attribute "kagent"
 include_attribute "elasticsearch"
 
-default['elastic']['version']               = "6.2.3"
+default['elastic']['version']               = "7.2.0"
 default['elastic']['install_type']          = "tarball"
-default['elastic']['checksum']              = "01dd8dec5f0acf04336721e404bf4d075675a3acae9f2a9fdcdbb5ca11baca76"
-default['elastic']['url']                   = node['download_url'] + "/elasticsearch-#{node['elastic']['version']}.tar.gz"
+default['elastic']['checksum']              = "4c77cfce006de44f4657469523c6305e2ae06b60021cabb4398c2d0a48e8920a"
+default['elastic']['url']                   = node['download_url'] + "/elasticsearch-oss-#{node['elastic']['version']}-linux-x86_64.tar.gz"
 default['elastic']['user']                  = node['install']['user'].empty? ? "elastic" : node['install']['user']
 default['elastic']['group']                 = node['install']['user'].empty? ? "elastic" : node['install']['user']
 

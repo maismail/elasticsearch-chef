@@ -79,7 +79,6 @@ mysql_ip = my_ip
 elastic_ip = private_recipe_ip("elastic","default")
 all_elastic_nodes = node['elastic']['default']['private_ips']
 node_name = "node#{elastic_ip.gsub(/\./, '')}"
-min_master_nodes = all_elastic_nodes.length() > 1 ? 2 : 1
 elasticsearch_configure 'elasticsearch' do
    path_home node['elastic']['home_dir']
    path_conf "#{node['elastic']['home_dir']}/config"
@@ -92,12 +91,12 @@ elasticsearch_configure 'elasticsearch' do
      'node.master' => node['elastic']['master'] == "true" ,
      'node.data' => node['elastic']['data'] == "true",
      'network.host' =>  my_ip,
-     'transport.tcp.port' => node['elastic']['ntn_port'],
+     'transport.port' => node['elastic']['ntn_port'],
      'http.port' => node['elastic']['port'],
      'http.cors.enabled' => true,
      'http.cors.allow-origin' => "*",
-     'discovery.zen.minimum_master_nodes' => min_master_nodes,
-     'discovery.zen.ping.unicast.hosts' => all_elastic_nodes
+     'discovery.seed_hosts' => all_elastic_nodes,
+     'cluster.initial_master_nodes' => all_elastic_nodes
    })
    instance_name node_name
    action :manage
