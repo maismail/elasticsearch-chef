@@ -30,6 +30,11 @@ user node['elastic']['user'] do
   not_if { node['install']['external_users'].casecmp("true") == 0 }
 end
 
+group node['kagent']['certs_group'] do
+  action :modify
+  members node['elastic']['user']
+end
+
 elasticsearch_user 'elasticsearch' do
   username node['elastic']['user']
   groupname node['elastic']['group']
@@ -79,11 +84,14 @@ mysql_ip = my_ip
 elastic_ip = private_recipe_ip("elastic","default")
 all_elastic_nodes = node['elastic']['default']['private_ips']
 node_name = "node#{elastic_ip.gsub(/\./, '')}"
+
 elasticsearch_configure 'elasticsearch' do
    path_home node['elastic']['home_dir']
-   path_conf "#{node['elastic']['home_dir']}/config"
-   path_data "#{node['elastic']['data_dir']}"
-   path_logs "#{node['elastic']['home_dir']}/logs"
+   path_conf node['elastic']['config_dir']
+   path_data node['elastic']['data_dir']
+   path_logs node['elastic']['log_dir']
+   path_plugins node['elastic']['plugins_dir']
+   path_bin node['elastic']['bin_dir']
    logging({:"action" => 'INFO'})
    configuration ({
      'cluster.name' => node['elastic']['cluster_name'],
@@ -101,6 +109,55 @@ elasticsearch_configure 'elasticsearch' do
    instance_name node_name
    action :manage
 end
+
+=begin
+elastic_opendistro 'opendistro_security' do
+  action :install_security
+end
+
+
+template "#{node['elastic']['opendistro_security']['config_dir']}/action_groups.yml" do
+  source "action_groups.yml.erb"
+  user node['elastic']['user']
+  group node['elastic']['group']
+  mode "600"
+end
+
+template "#{node['elastic']['opendistro_security']['config_dir']}/internal_users.yml" do
+  source "internal_users.yml.erb"
+  user node['elastic']['user']
+  group node['elastic']['group']
+  mode "600"
+end
+
+template "#{node['elastic']['opendistro_security']['config_dir']}/roles.yml" do
+  source "roles.yml.erb"
+  user node['elastic']['user']
+  group node['elastic']['group']
+  mode "600"
+end
+
+template "#{node['elastic']['opendistro_security']['config_dir']}/roles_mapping.yml" do
+  source "roles_mapping.yml.erb"
+  user node['elastic']['user']
+  group node['elastic']['group']
+  mode "600"
+end
+
+template "#{node['elastic']['opendistro_security']['config_dir']}/tenants.yml" do
+  source "tenants.yml.erb"
+  user node['elastic']['user']
+  group node['elastic']['group']
+  mode "600"
+end
+
+template "#{node['elastic']['opendistro_security']['config_dir']}/config.yml" do
+  source "config.yml.erb"
+  user node['elastic']['user']
+  group node['elastic']['group']
+  mode "600"
+end
+=end
 
 elasticsearch_service "#{service_name}" do
    instance_name node['elastic']['node_name']
@@ -206,7 +263,14 @@ elastic_start "start_install_elastic" do
   action :run
 end
 
-# Download exporter 
+#Opendistro Security
+=begin
+elastic_opendistro "run_securityadmin" do
+  :run_securityadmin
+end
+=end
+
+# Download exporter
 base_package_filename = File.basename(node['elastic']['exporter']['url'])
 cached_package_filename = "#{Chef::Config['file_cache_path']}/#{base_package_filename}"
 
@@ -218,7 +282,7 @@ remote_file cached_package_filename do
 end
 
 elastic_exporter_downloaded= "#{node['elastic']['exporter']['home']}/.elastic_exporter.extracted_#{node['elastic']['exporter']['version']}"
-# Extract elastic_exporter 
+# Extract elastic_exporter
 bash 'extract_elastic_exporter' do
   user "root"
   code <<-EOH
@@ -238,10 +302,10 @@ link node['elastic']['exporter']['base_dir'] do
   to node['elastic']['exporter']['home']
 end
 
-# Template and configure elasticsearch exporter 
+# Template and configure elasticsearch exporter
 case node['platform_family']
 when "rhel"
-  systemd_script = "/usr/lib/systemd/system/elastic_exporter.service" 
+  systemd_script = "/usr/lib/systemd/system/elastic_exporter.service"
 else
   systemd_script = "/lib/systemd/system/elastic_exporter.service"
 end

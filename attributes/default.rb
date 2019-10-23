@@ -19,8 +19,10 @@ default['elastic']['dir']                   = node['install']['dir'].empty? ? "/
 default['elastic']['version_dir']           = "#{node['elastic']['dir']}/elasticsearch-#{node['elastic']['version']}"
 default['elastic']['home_dir']              = "#{node['elastic']['dir']}/elasticsearch"
 default['elastic']['data_dir']              = "#{node['elastic']['dir']}/elasticsearch-data"
-
-default['elastic']['plugins_dir']           = node['elastic']['home_dir'] + "/plugins"
+default['elastic']['config_dir']            = "#{node['elastic']['home_dir']}/config"
+default['elastic']['log_dir']               = "#{node['elastic']['home_dir']}/logs"
+default['elastic']['bin_dir']               = "#{node['elastic']['home_dir']}/bin"
+default['elastic']['plugins_dir']           = "#{node['elastic']['home_dir']}/plugins"
 
 default['elastic']['limits']['nofile']      = "65536"
 default['elastic']['limits_nproc']          = '65536'
@@ -58,3 +60,31 @@ default['elastic']['exporter']['flags']         = %w[--es.all
     --es.indices
     --es.shards
 ]
+
+#OpenDistro Security Plugin
+default['elastic']['opendistro']['version'] = "1.2.0.0"
+default['elastic']['opendistro_security']['url'] = "#{node['download_url']}/opendistro_security-#{node['elastic']['opendistro']['version']}.zip"
+default['elastic']['opendistro_security']['base_dir'] = "#{node['elastic']['plugins_dir']}/opendistro_security"
+default['elastic']['opendistro_security']['config_dir'] = "#{node['elastic']['opendistro_security']['base_dir']}/securityconfig"
+default['elastic']['opendistro_security']['tools_dir'] = "#{node['elastic']['opendistro_security']['base_dir']}/tools"
+default['elastic']['opendistro_security']['tools']['hash'] = "#{node['elastic']['opendistro_security']['tools_dir']}/hash.sh"
+default['elastic']['opendistro_security']['tools']['securityadmin'] = "#{node['elastic']['opendistro_security']['tools_dir']}/securityadmin.sh"
+
+default['elastic']['opendistro_security']['admin']['username'] = "admin"
+default['elastic']['opendistro_security']['admin']['password'] = "adminpw"
+default['elastic']['opendistro_security']['kibana']['username'] = "kibanaserver"
+default['elastic']['opendistro_security']['kibana']['password'] = "kibanaserver"
+
+default['elastic']['opendistro_security']['keystore']['type'] = "JKS"
+default['elastic']['kagent']['keystore']['location'] = node['install']['localhost'].casecmp?("true") ? "#{node['kagent']['keystore_dir']}/localhost__kstore.jks" : "#{node['kagent']['keystore_dir']}/#{node['fqdn']}__kstore.jks"
+default['elastic']['opendistro_security']['keystore']['file'] = "kstore.jks"
+default['elastic']['opendistro_security']['keystore']['location'] = "#{node['elastic']['config_dir']}/#{node['elastic']['opendistro_security']['keystore']['file']}"
+default['elastic']['opendistro_security']['keystore']['password'] = node['hopsworks']['master']['password']
+
+default['elastic']['opendistro_security']['truststore']['type'] = "JKS"
+default['elastic']['kagent']['truststore']['location'] = node['install']['localhost'].casecmp?("true") ?  "#{node['kagent']['keystore_dir']}/localhost__tstore.jks" : "#{node['kagent']['keystore_dir']}/#{node['fqdn']}__tstore.jks"
+default['elastic']['opendistro_security']['truststore']['file'] = "tstore.jks"
+default['elastic']['opendistro_security']['truststore']['location'] = "#{node['elastic']['config_dir']}/#{node['elastic']['opendistro_security']['truststore']['file']}"
+default['elastic']['opendistro_security']['truststore']['password'] = node['hopsworks']['master']['password']
+
+default['elastic']['opendistro_security']['https']['enabled'] = true
