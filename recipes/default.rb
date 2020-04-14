@@ -93,13 +93,16 @@ template "#{node['elastic']['bin_dir']}/consul/elasticsearch-health.sh" do
   owner node['elastic']['user']
   group node['elastic']['group']
   mode 0750
-  template_variables({
-    :id => my_elastic_node_id()
+  variables({
+    :elastic_url => my_elastic_url()
   })
 end
 
 consul_service "Registering Elasticsearch with Consul" do
   service_definition "consul/elasticsearch-consul.hcl.erb"
+  template_variables({
+    :id => my_elastic_node_id()
+  })
   action :register
 end
 
