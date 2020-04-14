@@ -3,15 +3,24 @@ services = [
         id = "elasticsearch/transport"
         name = "elasticsearch"
         tags = [
-            "transport"
+            "transport",
+            "<%= @id %>"
         ]
         port = <%= node['elastic']['ntn_port'] %>
+        check = {
+            id = "elasticsearch-health-check"
+            name = "Health check for Elasticsearch"
+            args = ["<%= node['elastic']['bin_dir'] %>/consul/nn-health.sh"]
+            interval = "20s"
+            timeout = "20s"
+        }
     },
     {
         id = "elasticsearch/http"
         name = "elasticsearch"
         tags = [
-            "http"
+            "http",
+            "<%= @id %>"
         ]
         port = <%= node['elastic']['port'] %>
         check = {

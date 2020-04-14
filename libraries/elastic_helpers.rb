@@ -35,6 +35,10 @@ module Elastic
       return all_elastic_urls()[0]
     end
 
+    def my_elastic_node_id()
+      return private_recipe_ips("elastic", "default").index(my_private_ip())
+    end
+    
     def all_elastic_ips()
       return private_recipe_ips("elastic", "default")
     end

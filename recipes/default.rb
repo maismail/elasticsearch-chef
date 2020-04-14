@@ -81,13 +81,30 @@ include_recipe "ulimit2"
 node.override['elasticsearch']['url'] = node['elastic']['url']
 node.override['elasticsearch']['version'] = node['elastic']['version']
 
-consul_service "Registering Elasticsearch with Consul" do
-    service_definition "consul/elasticsearch-consul.hcl.erb"
-    action :register
+directory "#{node['elastic']['bin_dir']}/consul" do
+  owner node['elastic']['user']
+  group node['elastic']['group']
+  mode "0750"
+  action :create
 end
 
-elastic_fqn = consul_helper.get_service_fqdn("http.elasticsearch")
-Chef::Log.info "Test Elasticsearch with Consul #{elastic_fqn}"
+template "#{node['elastic']['bin_dir']}/consul/elasticsearch-health.sh" do
+  source "consul/elasticsearch-health.sh.erb"
+  owner node['elastic']['user']
+  group node['elastic']['group']
+  mode 0750
+  template_variables({
+    :id => my_elastic_node_id()
+  })
+end
+
+consul_service "Registering Elasticsearch with Consul" do
+  service_definition "consul/elasticsearch-consul.hcl.erb"
+  action :register
+end
+
+elastic_fqn = consul_helper.get_service_fqdn("elasticsearch")
+Chef::Log.error "Test Elasticsearch with Consul #{elastic_fqn}"
 
 all_elastic_hosts = all_elastic_host_names()
 elastic_host = my_host()

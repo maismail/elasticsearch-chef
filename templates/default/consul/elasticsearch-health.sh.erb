@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+CHECK="curl  --fail --silent -k --cert <%=node["kagent"]["certs"]["elastic_admin_certificate"]%> --key <%=node["kagent"]["certs"]["elastic_admin_key"]%> -XGET <%= @elastic_url %>/_cluster/health > /dev/null 2>&1"
+
+source <%= node['consul']['health-check']['retryable-check-file'] %>
+
+_run_health_check "$CHECK"
