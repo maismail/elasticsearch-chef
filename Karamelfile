@@ -5,6 +5,5 @@ dependencies:
   - recipe: elastic::default
     global:  
       - kagent::default
-
-
-
+      - consul::master
+      - consul::slave

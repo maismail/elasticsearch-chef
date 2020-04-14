@@ -1,0 +1,22 @@
+services = [
+    {
+        id = "elasticsearch/transport"
+        name = "elasticsearch"
+        tags = [
+            "transport"
+        ]
+        port = <%= node['elastic']['ntn_port'] %>
+    },
+    {
+        id = "elasticsearch/http"
+        name = "elasticsearch"
+        tags = [
+            "http"
+        ]
+        port = <%= node['elastic']['port'] %>
+        check = {
+            id = "elasticsearch-http-check"
+            alias_service = "elasticsearch/transport"
+        }
+    }
+]

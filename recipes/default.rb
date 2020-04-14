@@ -81,6 +81,14 @@ include_recipe "ulimit2"
 node.override['elasticsearch']['url'] = node['elastic']['url']
 node.override['elasticsearch']['version'] = node['elastic']['version']
 
+consul_service "Registering Elasticsearch with Consul" do
+    service_definition "consul/elasticsearch-consul.hcl.erb"
+    action :register
+end
+
+elastic_fqn = consul_helper.get_service_fqdn("http.elasticsearch")
+Chef::Log.info "Test Elasticsearch with Consul #{elastic_fqn}"
+
 all_elastic_hosts = all_elastic_host_names()
 elastic_host = my_host()
 elasticsearch_configure 'elasticsearch' do
